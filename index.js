@@ -4,9 +4,11 @@ import cors from "cors";
 import logger from "morgan";
 import path from "path";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 import registerRouter from "./routes/AdminRoutes/register.route.js";
 import transactionRouter from "./routes/UserRoutes/transaction.route.js";
+import comissionRouter from "./routes/UserRoutes/comission.route.js";
 import loginRouter from "./routes/publicrouts/login.route.js";
 import brandingRouter from "./routes/AdminRoutes/branding.route.js";
 import currencyRouter from "./routes/AdminRoutes/currency.route.js";
@@ -17,17 +19,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 7777;
 
-// --------------------
 // Middleware
-// --------------------
-app.use(cors({ origin: process.env.ORIGIN || "*" }));
+
+// app.use(cors({ origin: process.env.ORIGIN || "*" }));
+app.use(cors({
+    origin: process.env.ORIGIN,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(logger("dev"));
 
-// --------------------
+
 // Static Files
-// --------------------
+
 const __dirname = path.resolve();
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -39,6 +46,7 @@ app.use("/brandingLogo", express.static(path.join(__dirname, "uploads/logoUpload
 // --------------------
 app.use("/api/user", registerRouter);
 app.use("/api/transaction", transactionRouter);
+app.use("/api/comission", comissionRouter);
 app.use("/api/auth", loginRouter);
 app.use("/api/branding", brandingRouter);
 app.use("/api/currency", currencyRouter);
@@ -72,7 +80,8 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await mongoose.connect(process.env.DB_URL);
-    console.log("MongoDB connected");
+    console.log("Connected database:", mongoose.connection.name);
+console.log("MongoDB connected");
 
     app.listen(PORT, () => {
       console.log(` Server running on port ${PORT}`);

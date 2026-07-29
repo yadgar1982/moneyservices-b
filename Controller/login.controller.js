@@ -1,46 +1,96 @@
 import userSchema from "../Model/register.model.js";
 import bcrypt from "bcryptjs";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-export const login=async(req,res)=>{
-  try{
-    const {email,password}=req.body
-    if (!email || !password){
-      return res.status(400).json({msg:"Email and Password are requied"})
-
+// Login
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ msg: "Email and Password are requied" });
     }
 
-    const user=await userSchema.findOne({email})
-    if(!user){
-      return res.status(401).json({msg:"Invalid Credentials"})
+    const user = await userSchema.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ msg: "Invalid Credentials" });
     }
 
-    const isMatch= await bcrypt.compare(password, user.password);
-    if (!isMatch){
-      return res.status(401).json({msg:"Invalid Credentials"});
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ msg: "Invalid Credentials" });
     }
 
-    const payload={
-      email:user.email,
+    const payload = {
+      email: user.email,
       role: user.role,
-      id:user._id
+      id: user._id,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "4h",
+    });
+
+    // Store JWT in HttpOnly Cookie
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 4 * 60 * 60 * 1000, // 4 hours
+        path: "/",
+      });
+      // Don't send password to frontend
+        const safeUser = await userSchema
+          .findById(user._id)
+          .select("-password");
+
+    res.status(200).json({
+      success:true,
+      message: "Login successful",
+      user: safeUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "server error",
+      error: err.message,
+    });
+  }
+};
+
+// Session
+export const session = async (req, res) => {
+  try {
+    const user = await userSchema
+      .findById(req.user.id)
+      .select("-password");
+
+    if (!user) {
+      return res.status(401).json({
+        authenticated: false,
+      });
     }
 
-    const token =await jwt.sign(payload,process.env.JWT_SECRET,{expiresIn: '4h',
-
+    return res.json({
+      authenticated: true,
+      user,
     });
-    res.status(200).json({
-      message:"Login successful",
-      token,
-      user:user,
-    })
-
-
-  }catch(err){
-     res.status(500).json({
-      message:"server error",
-      error:err.message
-    })
+  } catch (err) {
+    return res.status(401).json({
+      authenticated: false,
+    });
   }
-}
+};
 
+
+export const logout = (req, res) => {
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+};

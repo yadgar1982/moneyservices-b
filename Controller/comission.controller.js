@@ -1,17 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import comissionSchema from "../Model/comission.model";
+import comissionSchema from "../Model/comission.model.js";
 
 // Create comission
 export const createComission = async (req, res) => {
   try {
     const { _id, ...data } = req.body;
     const comission = await comissionSchema.create(data);
-
-
-  
-
 
     return res.status(201).json({
       msg: "data registered successfully",
@@ -27,7 +23,7 @@ export const createComission = async (req, res) => {
 
 export const getAllComissions = async (req, res) => {
   try {
-    const comissions = await comissionSchema.find().sort({ _id: -1 });
+    const comissions = await comissionSchema.find().sort({ transactionId: -1 });
     return res.status(200).json({ data: comissions });
   } catch (err) {
     return res
@@ -41,22 +37,30 @@ export const getComissionById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!id) return res.status(400).json({ msg: "ID is required" });
+    if (!id) {
+      return res.status(400).json({
+        msg: "TransactionId is required",
+      });
+    }
 
-    // get ALL records with same transactionId
-    const comissions = await comissionSchema.find({
+    const comission = await comissionSchema.findOne({
       transactionId: id,
     });
 
-    if (!comissions || comissions.length === 0) {
-      return res.status(404).json({ msg: "Transaction not found" });
+    if (!comission) {
+      return res.status(404).json({
+        msg: "Commission not found",
+      });
     }
 
-    return res.status(200).json({ data: comissions });
+    return res.status(200).json({
+      data: comission,
+    });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ msg: "Internal server error", error: err.message });
+    return res.status(500).json({
+      msg: "Internal server error",
+      error: err.message,
+    });
   }
 };
 
@@ -82,28 +86,31 @@ export const getComissionByAcc = async (req, res) => {
 //Update
 export const updateComission = async (req, res) => {
   try {
+   
     const { id } = req.params;
-    const data = req.body;
+    const { transactionId, ...data } = req.body;
+
 
     if (!id) {
       return res.status(400).json({ msg: "transactionId is required" });
     }
 
-
-
-    const comissions = await comissionSchema.find({
-      transactionId: id,
-    });
-
-    if (!comissions.length) {
-      return res.status(404).json({ msg: "Transaction not found" });
+    if (!Object.keys(data).length) {
+      return res.status(400).json({
+        msg: "No data provided",
+      });
     }
 
     const updated = await comissionSchema.findOneAndUpdate(
       { transactionId: id },
-      { $set: updateFields },
+      { $set: data },
       { new: true },
     );
+    if (!updated) {
+      return res.status(404).json({
+        msg: "Commission not found",
+      });
+    }
 
     return res.status(200).json({
       msg: "Comission updated successfully",
@@ -117,26 +124,23 @@ export const updateComission = async (req, res) => {
     });
   }
 };
+
+
+
 // Delete
 
-export const deleteComission=(req,res)=>{
-  try{
-    const {transactionId}=req.params;
-    const comission=await comissionSchema.findOneAndDelete({transactionId})
-    if(!comission){
-       return res.status(404).json({
-        msg:"Comission not found"
-      })
-    }
+export const deleteComission = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await comissionSchema.findOneAndDelete({ transactionId:id });
+
     return res.status(200).json({
-      msg:"Comission deleted successfully"
-    })
-    
-  }catch(err){
+      msg: "Commission deleted successfully",
+    });
+  } catch (err) {
     return res.status(500).json({
-      msg:err.message
-    })
-
+      msg: err.message,
+    });
   }
-}
-
+};

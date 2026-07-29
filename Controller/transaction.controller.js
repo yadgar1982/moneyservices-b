@@ -95,25 +95,6 @@ export const getTransactionByAccountNo = async (req, res) => {
 };
 
 // update by Id
-// export const updateOne = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const data = req.body;
-
-//     const transaction = await transactionSchema.findByIdAndUpdate(id, data, {
-//       new: true,
-//     });
-//     if (!transaction)
-//       return res.status(404).json({ msg: "Transaction record not found" });
-
-//     return res
-//       .status(200)
-//       .json({ msg: "Transaction record updated successfully", data: transaction });
-//   } catch (err) {
-//     return res.status(500).json({ msg: "Internal Server Error" + err.message });
-//   }
-// };
-
 export const updateTransaction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -147,7 +128,7 @@ export const updateTransaction = async (req, res) => {
       ...(signature && { signature }),
       ...(documentFile && { documents: documentFile }),
     };
-delete updateFields.fullname;
+       delete updateFields.fullname;
 
     const transactions = await transactionSchema.find({
       transactionId: id,
@@ -257,59 +238,43 @@ export const updateTransactionByAccountNo = async (req, res) => {
   }
 };
 
+
+
+// update Transactcion pass
+export const updateTransactionPass=async(req,res)=>{
+  try{
+    const {id}=req.params;
+    const {isPass}=req.body;
+
+    const updated=await transactionSchema.updateMany(
+      {transactionId:id},
+      {$set:{isPass}},
+      {new:true}
+    );
+    if(!updated){
+      return res.status(404).json({
+        success:false,
+        message:"Transaction not found"
+      });
+    }
+    return res.status(200).json({
+      success:true,
+      message:"Transaction updated successfully",
+      data:updated
+    });
+  }catch(err){
+    return res.status(500).json({
+      success:false,
+      message:"Internal Server Error",
+      error:err.message,
+    });
+  }
+}
+
+
 // Delete by ID
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// export const deleteTransaction = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-
-//     if (!id) return res.status(400).json({ msg: "ID is required" });
-// await transactionSchema.findOneAndDelete({ transactionId: id });
-
-//     if (!transaction)
-//       return res.status(404).json({ msg: "Transaction not found" });
-
-//     // Match Multer upload folder
-//     const uploadsFolder = path.join(__dirname, "../uploads");
-
-//     const fileFields = ["documents", "image", "signature"];
-
-//     for (const field of fileFields) {
-//       const files = Array.isArray(transaction[field])
-//         ? transaction[field]
-//         : [transaction[field]];
-
-//       for (const file of files) {
-//         if (!file) continue;
-
-//         // Remove leading "uploads/" if present
-//         const fileName = file.replace(/^uploads[\\/]/, "");
-//         const filePath = path.join(uploadsFolder, fileName);
-
-//         try {
-//           await fs.access(filePath); // check if file exists
-//           await fs.unlink(filePath); //remore file
-//         } catch (err) {
-//           console.log(`${field} not found or could not delete: ${fileName}`);
-//         }
-//       }
-//     }
-
-//     await transactionSchema.findManyAndDelete({ transactionId: id });
-
-//     return res
-//       .status(200)
-//       .json({ msg: "Transaction and associated files deleted successfully" });
-//   } catch (err) {
-//     console.error(err);
-//     return res
-//       .status(500)
-//       .json({ msg: "Failed to delete transaction", error: err.message });
-//   }
-// };
-
-// delete by account No
 
 export const deleteTransaction = async (req, res) => {
   try {
@@ -374,3 +339,36 @@ export const deleteTransactionByAccountNo = async (req, res) => {
       .json({ msg: "Failed to delete transaction", error: err.message });
   }
 };
+
+
+
+// Generate Trnsaction Id
+
+export const getNextTransactionId=async(req,res)=>{
+  try{
+    // Find the latest transaction
+    const lastTransactgion = await transactionSchema.findOne()
+    .sort({transactionId:-1});
+    let nextNumber=1;
+    // If a transaction exists, get its number
+    if(lastTransactgion && lastTransactgion.transactionId){
+      nextNumber=
+      parseInt(
+        lastTransactgion.transactionId.replace("TRX-", ""),10 ) +1;}
+
+
+    // Create the Next Id
+    const transactionId = `TRX-${String(nextNumber).padStart(8, "0")}`;
+
+    return res.status(200).json({
+      transactionId,
+    });
+      
+    }catch(error){
+      console.error(error);
+      return res.status(500).json({
+        message:"Failed to generate Transaction Id"
+      })
+  }
+
+}

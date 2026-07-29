@@ -10,7 +10,7 @@ updateComission,
 deleteComission,
 
  
-} from "../../Controller/comission.controller";
+} from "../../Controller/comission.controller.js";
 
 // Create a comissions
 comissionRouter.post(  "/create", createComission);
@@ -23,14 +23,14 @@ comissionRouter.get('/readbyid/:id', getComissionById);
 
 
 // Delete a comissions by ID
-comissionRouter.put("/update/:id", updatecomission);
+comissionRouter.put("/update/:id", updateComission);
 // Delete a comissions by ID
-comissionRouter.delete('/delete/:id', deletecomission);
+comissionRouter.delete('/delete/:id', deleteComission);
 
-// Update comissions by Account Number
-comissionRouter.put('/updatebyaccountno/:accountNo', updatecomissionByAccountNo);
+// // Update comissions by Account Number
+// comissionRouter.put('/updatebyaccountno/:accountNo', updatecomissionByAccountNo);
 
-// Get comissions by Account Number
-comissionRouter.get('/getbyaccountno/:accountNo', getcomissionByAccountNo);
+// // Get comissions by Account Number
+// comissionRouter.get('/getbyaccountno/:accountNo', getcomissionByAccountNo);
 
 export default comissionRouter;

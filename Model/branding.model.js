@@ -1,6 +1,6 @@
 import {Schema,model}from "mongoose";
 const brandingSchema = new Schema({
-  name:{
+  companyName:{
     type:String,
     required:true,
     trim:true,
