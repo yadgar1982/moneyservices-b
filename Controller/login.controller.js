@@ -31,20 +31,18 @@ export const login = async (req, res) => {
     });
 
     // Store JWT in HttpOnly Cookie
-      res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 4 * 60 * 60 * 1000, // 4 hours
-        path: "/",
-      });
-      // Don't send password to frontend
-        const safeUser = await userSchema
-          .findById(user._id)
-          .select("-password");
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 4 * 60 * 60 * 1000,
+      path: "/",
+    });
+    // Don't send password to frontend
+    const safeUser = await userSchema.findById(user._id).select("-password");
 
     res.status(200).json({
-      success:true,
+      success: true,
       message: "Login successful",
       user: safeUser,
     });
@@ -59,9 +57,7 @@ export const login = async (req, res) => {
 // Session
 export const session = async (req, res) => {
   try {
-    const user = await userSchema
-      .findById(req.user.id)
-      .select("-password");
+    const user = await userSchema.findById(req.user.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
@@ -80,14 +76,13 @@ export const session = async (req, res) => {
   }
 };
 
-
 export const logout = (req, res) => {
   res.clearCookie("authToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+});
 
   return res.status(200).json({
     success: true,
