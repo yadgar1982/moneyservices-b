@@ -53,6 +53,7 @@ export const login = async (req, res) => {
     message: "server error",
     error: err.message,
   });
+}
 };
 
 // Session
