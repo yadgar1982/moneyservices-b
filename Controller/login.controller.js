@@ -39,13 +39,13 @@ export const login = async (req, res) => {
       expiresIn: "4h",
     });
 
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 4 * 60 * 60 * 1000,
-      path: "/",
-    });
+   res.cookie("authToken", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 4 * 60 * 60 * 1000,
+  path: "/",
+});
 
     const safeUser = await userSchema
       .findById(user._id)
@@ -93,12 +93,12 @@ export const session = async (req, res) => {
 
 // Logout
 export const logout = (req, res) => {
-  res.clearCookie("authToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
+res.clearCookie("authToken", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+});
 
   return res.status(200).json({
     success: true,
