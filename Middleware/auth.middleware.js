@@ -9,20 +9,27 @@ export const verifyToken = (req, res, next) => {
     console.log("Token:", token);
 
     if (!token) {
-      return res.status(401).json({ msg: "Unauthorized. Token missing." });
+      return res.status(401).json({
+        msg: "Unauthorized. Token missing.",
+      });
     }
 
+    console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded:", decoded);
+
+    console.log("Decoded User:", decoded);
 
     req.user = decoded;
     next();
   } catch (err) {
     console.log("JWT Error:", err.message);
-    return res.status(401).json({ msg: "Invalid or expired token." });
+
+    return res.status(401).json({
+      msg: "Invalid or expired token.",
+    });
   }
 };
-
 // allow isAdmin
 export const isAdmin=(req,res,next)=>{
   if(req.user?.role !== "admin"){
