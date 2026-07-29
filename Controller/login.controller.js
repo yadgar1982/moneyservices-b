@@ -46,12 +46,13 @@ export const login = async (req, res) => {
       message: "Login successful",
       user: safeUser,
     });
-  } catch (err) {
-    res.status(500).json({
-      message: "server error",
-      error: err.message,
-    });
-  }
+} catch (err) {
+  console.error(err);
+
+  return res.status(500).json({
+    message: "server error",
+    error: err.message,
+  });
 };
 
 // Session
