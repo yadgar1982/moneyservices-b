@@ -6,18 +6,27 @@ import jwt from "jsonwebtoken";
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.status(400).json({ msg: "Email and Password are requied" });
+      return res.status(400).json({
+        msg: "Email and Password are required",
+      });
     }
 
     const user = await userSchema.findOne({ email });
+
     if (!user) {
-      return res.status(401).json({ msg: "Invalid Credentials" });
+      return res.status(401).json({
+        msg: "Invalid Credentials",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
-      return res.status(401).json({ msg: "Invalid Credentials" });
+      return res.status(401).json({
+        msg: "Invalid Credentials",
+      });
     }
 
     const payload = {
@@ -30,36 +39,40 @@ export const login = async (req, res) => {
       expiresIn: "4h",
     });
 
-    // Store JWT in HttpOnly Cookie
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 4 * 60 * 60 * 1000,
       path: "/",
     });
-    // Don't send password to frontend
-    const safeUser = await userSchema.findById(user._id).select("-password");
 
-    res.status(200).json({
+    const safeUser = await userSchema
+      .findById(user._id)
+      .select("-password");
+
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       user: safeUser,
     });
-} catch (err) {
-  console.error(err);
 
-  return res.status(500).json({
-    message: "server error",
-    error: err.message,
-  });
-}
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
 };
 
 // Session
 export const session = async (req, res) => {
   try {
-    const user = await userSchema.findById(req.user.id).select("-password");
+    const user = await userSchema
+      .findById(req.user.id)
+      .select("-password");
 
     if (!user) {
       return res.status(401).json({
@@ -78,13 +91,14 @@ export const session = async (req, res) => {
   }
 };
 
+// Logout
 export const logout = (req, res) => {
   res.clearCookie("authToken", {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  path: "/",
-});
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
 
   return res.status(200).json({
     success: true,
