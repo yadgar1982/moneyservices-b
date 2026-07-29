@@ -21,9 +21,15 @@ const PORT = process.env.PORT || 7777;
 
 // Middleware
 
-// app.use(cors({ origin: process.env.ORIGIN || "*" }));
-app.use(cors({
-    origin: process.env.ORIGIN,
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://moneyservices-f.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
     credentials: true,
   })
 );
