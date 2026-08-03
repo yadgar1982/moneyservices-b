@@ -40,12 +40,12 @@ export const login = async (req, res) => {
     });
 
    res.cookie("authToken", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 4 * 60 * 60 * 1000,
-  path: "/",
-});
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 4 * 60 * 60 * 1000,
+        path: "/",
+      });
 
     const safeUser = await userSchema
       .findById(user._id)
