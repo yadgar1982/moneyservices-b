@@ -165,18 +165,14 @@ res.clearCookie("authToken", {
 
 export const forgetPassword = async (req, res) => {
   try {
-    console.log("1. Forgot password request received");
-
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Email is required",
+        message: "Email is required.",
       });
     }
-
-    console.log("2. Looking for user...");
 
     const user = await Register.findOne({
       email: email.toLowerCase().trim(),
@@ -185,26 +181,20 @@ export const forgetPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "No account found with this Email.",
+        message: "No account found with this email.",
       });
     }
 
-    console.log("3. User found:", user.email);
-
+    // Generate OTP
     const otp = generateOTP();
 
-    console.log("4. Generated OTP:", otp);
-
+    // Save OTP
     user.otp = otp;
     user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     await user.save();
 
-    console.log("5. OTP saved");
-
-    console.log("6. Sending email...");
-
-    // ONLY EMAIL
+    // Send Email
     try {
       await sendEmail({
         to: user.email,
@@ -214,29 +204,26 @@ export const forgetPassword = async (req, res) => {
           otp,
         }),
       });
-
-      console.log("7. Email sent successfully");
-
     } catch (emailErr) {
-      console.error("EMAIL ERROR:", emailErr);
+      console.error(emailErr);
 
       return res.status(500).json({
         success: false,
-        message: emailErr.message,
+        message: "Unable to send OTP email. Please try again later.",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent successfully",
+      message: "OTP sent successfully.",
     });
 
   } catch (err) {
-    console.error("Forgot Password Error:", err);
+    console.error(err);
 
     return res.status(500).json({
       success: false,
-      message: err.message,
+      message: "Something went wrong.",
     });
   }
 };
