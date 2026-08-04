@@ -1,4 +1,5 @@
 import "./config/env.js";
+console.log("Node Version:", process.version);
 import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
