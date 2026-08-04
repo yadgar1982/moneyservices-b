@@ -204,16 +204,27 @@ export const forgetPassword = async (req, res) => {
 
     console.log("6. Sending email...");
 
-    await sendEmail({
-      to: user.email,
-      subject: "Password Reset OTP",
-      html: otpEmailTemplate({
-        name: user.fullname || "User",
-        otp,
-      }),
-    });
+    // ONLY EMAIL
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Password Reset OTP",
+        html: otpEmailTemplate({
+          name: user.fullname || "User",
+          otp,
+        }),
+      });
 
-    console.log("7. Email sent successfully");
+      console.log("7. Email sent successfully");
+
+    } catch (emailErr) {
+      console.error("EMAIL ERROR:", emailErr);
+
+      return res.status(500).json({
+        success: false,
+        message: emailErr.message,
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -225,7 +236,7 @@ export const forgetPassword = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message: err.message,
     });
   }
 };
