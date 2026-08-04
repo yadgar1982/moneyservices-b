@@ -5,6 +5,7 @@ import logger from "morgan";
 import path from "path";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import "./Scheduler/backupScheduler.js"; 
 
 import registerRouter from "./routes/AdminRoutes/register.route.js";
 import transactionRouter from "./routes/UserRoutes/transaction.route.js";
@@ -13,7 +14,8 @@ import loginRouter from "./routes/publicrouts/login.route.js";
 import brandingRouter from "./routes/AdminRoutes/branding.route.js";
 import currencyRouter from "./routes/AdminRoutes/currency.route.js";
 import branchRouter from "./routes/AdminRoutes/branch.route.js";
-
+import backupRouter from "./routes/AdminRoutes/backup.route.js";
+import autoBackupRoute from "./routes/AdminRoutes/autoBackup.route.js"
 dotenv.config();
 
 const app = express();
@@ -57,7 +59,8 @@ app.use("/api/auth", loginRouter);
 app.use("/api/branding", brandingRouter);
 app.use("/api/currency", currencyRouter);
 app.use("/api/branch", branchRouter);
-
+app.use("/api/backup",backupRouter);
+app.use("/api/auto-backup",autoBackupRoute);
 // --------------------
 // 404 Handler
 // --------------------

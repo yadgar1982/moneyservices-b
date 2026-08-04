@@ -5,7 +5,7 @@ const comissionSchema = new mongoose.Schema(
     fullname: { type: String },
     user:{ type:String},
     branch:{type:String},
-    accountNo: { type: Number, required: true },
+    accountNo: { type: String, required: true },
     currency: { type: String, required: true },
     credit: { type: Number, required: true },
     debit: { type: Number, required: true },

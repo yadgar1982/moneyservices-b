@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "6a41ea64cccf1728592b72b3",
+    "currency": "USD",
+    "rate": 1,
+    "country": "us",
+    "createdAt": "2026-06-29T03:45:40.008Z",
+    "updatedAt": "2026-06-29T03:45:40.008Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a41ea69cccf1728592b72b7",
+    "currency": "AFN",
+    "rate": 65,
+    "country": "af",
+    "createdAt": "2026-06-29T03:45:45.332Z",
+    "updatedAt": "2026-06-29T03:45:45.332Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a41ea6ecccf1728592b72bb",
+    "currency": "PKR",
+    "rate": 120,
+    "country": "pk",
+    "createdAt": "2026-06-29T03:45:50.451Z",
+    "updatedAt": "2026-06-29T03:45:50.451Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a6773f970ed303e541e7166",
+    "currency": "IRR",
+    "rate": 1375000,
+    "country": "ir",
+    "createdAt": "2026-07-27T15:06:33.956Z",
+    "updatedAt": "2026-07-27T15:06:33.956Z",
+    "__v": 0
+  }
+]
