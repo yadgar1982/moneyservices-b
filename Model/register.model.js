@@ -1,54 +1,80 @@
-import {Schema, model}from "mongoose"
+import { Schema, model } from "mongoose";
 
-const registerSchema= new Schema({
-  fullname:{
-    type:String,
-    required:true,
-    trim:true
-  },
-  accountNo:{
-    type:String,
-    trim:true
-  },
-  email:{
-    type:String,
-    required:true,
-    unique:true,
-    trim:true,
-    lowercase:true
-  },
-  password:{
-    type:String,
-  },
-  mobile:{
-    type:Number,
-    required:false,
-    trim:true,
-  },
- country:{
-  type:String,
-  required:false,
-  trim: true,
- },
- address:{
-  type:String,
-  required:false,
- },
- branch:{
-  type:String,
-  required:false,
- },
- role:{
-  type:String,
-  required:true,
-  lowercase:true
- },
- profile:{
-  type:String,
- },
- otp:String,
- otpExpires:Date,
+const registerSchema = new Schema(
+  {
+    fullname: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-},{timestamps:true});
+    accountNo: {
+      type: String,
+      trim: true,
+    },
 
-export default model("User",registerSchema)
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+
+    password: {
+      type: String,
+    },
+
+    mobile: {
+      type: Number,
+      required: false,
+      trim: true,
+    },
+
+    country: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    address: {
+      type: String,
+      required: false,
+    },
+
+    branch: {
+      type: String,
+      required: false,
+    },
+
+    role: {
+      type: String,
+      required: true,
+      lowercase: true,
+    },
+
+    profile: {
+      type: String,
+    },
+
+    // ===== Password Reset =====
+
+    otp: {
+      type: String,
+      default: null,
+    },
+
+    otpExpires: {
+      type: Date,
+      default: null,
+    },
+
+    isOtpVerified: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true }
+);
+
+export default model("User", registerSchema);
