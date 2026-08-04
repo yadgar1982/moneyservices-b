@@ -9,12 +9,8 @@ export const sendEmail = async ({ to, subject, html }) => {
     },
   });
 
-  // Test SMTP connection
-  await transporter.verify();
-
-  // Send email
   return transporter.sendMail({
-    from: `"Money Services" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_USER,
     to,
     subject,
     html,

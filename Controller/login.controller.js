@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import generateOTP from "../utils/generateOTP.js";
 import otpEmailTemplate from "../templates/otpEmailTemplate.js";
-import {sendEmail}from "../config/nodmailer.js";
+import { sendEmail } from "../config/nodmailer.js";
 import Register from "../Model/register.model.js"
 
 // Login
