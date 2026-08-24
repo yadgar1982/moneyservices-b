@@ -7,7 +7,7 @@ export const create = async (req, res) => {
     const data = req.body;
     console.log("data",data)
 
-     const logo = req.file ? `/brandingLogo/${req.file.filename}` : null;
+     const logo = req.file ? `/logoUpload/${req.file.filename}` : null;
     console.log("logo image", logo);
     const newBranding = await new brandingModel({ ...data, logo }).save();
 
@@ -24,48 +24,7 @@ export const create = async (req, res) => {
     });
   }
 };
-
-// update branding
-
-// export const update = async (req, res) => {
-//   try {
-
-// console.log("ROUTE HIT");
-//     console.log("PARAM:",req.params);
-//     console.log("BODY:",req.body);
-//     console.log("FILE:",req.file);
-
-
-//     const { id } = req.params;
-//     const data = { ...req.body };
-  
-//     if (req.file){
-//       data.logo=`/brandingLogo/${req.file.filename}`;
-//     }
-
-
-//     delete data.name;
-//     const updatedData = await brandingModel.findByIdAndUpdate(id, data, {
-//       new: true,
-//     });
-   
-//       res.status(200).json({
-//       msg: "Branding Updated Successfully",
-//       success: true,
-//       data: updatedData,
-      
-//     });
-
- 
-//   } catch (err) {
-//     res.status(500).json({
-//       msg: "Unable to update brandin",
-//       success: false,
-//       error: err.message,
-//     });
-//   }
-// };
-
+// Update
 export const update = async (req,res)=>{
  try{
 
@@ -105,7 +64,7 @@ export const update = async (req,res)=>{
     }
 
     // save new file path (must match folder)
-    data.logo = `/brandingLogo/${req.file.filename}`;
+    data.logo = `/logoUpload/${req.file.filename}`;
 
   }
 

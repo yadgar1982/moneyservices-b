@@ -50,6 +50,8 @@ const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/userProfile", express.static(path.join(__dirname, "uploads/userUpload")));
 app.use("/brandingLogo", express.static(path.join(__dirname, "uploads/logoUpload")));
+app.use("/logoUpload", express.static(path.join(__dirname, "uploads/logoUpload"))
+);
 
 // --------------------
 // Routes

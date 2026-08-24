@@ -34,24 +34,27 @@ const storage = multer.diskStorage({
   },
 
   filename: (req, file, cb) => {
-    let prefix = "file";
+  const timestamp = Date.now();
+  const ext = path.extname(file.originalname);
 
-    if (file.fieldname === "profile") prefix = "profile";
-    if (file.fieldname === "signature") prefix = "signature";
-    if (file.fieldname === "image") prefix = "photo";
-    if (file.fieldname === "document") prefix = "document";
+  // Branding logo
+  if (file.fieldname === "logo") {
+    return cb(null, `logo-${timestamp}${ext}`);
+  }
 
-    const fullname = req.body.fullname
-      ? req.body.fullname.replace(/\s+/g, "_").toLowerCase()
-      : "unknown";
+  let prefix = "file";
 
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
+  if (file.fieldname === "profile") prefix = "profile";
+  if (file.fieldname === "signature") prefix = "signature";
+  if (file.fieldname === "image") prefix = "photo";
+  if (file.fieldname === "document") prefix = "document";
 
-    const filename = `${fullname}-${prefix}-${timestamp}${ext}`;
+  const fullname = req.body.fullname
+    ? req.body.fullname.replace(/\s+/g, "_").toLowerCase()
+    : "unknown";
 
-    cb(null, filename);
-  },
+  cb(null, `${fullname}-${prefix}-${timestamp}${ext}`);
+},
 });
 
 const fileFilter = (req, file, cb) => {
