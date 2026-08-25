@@ -95,19 +95,21 @@ export const getTransactionByAccountNo = async (req, res) => {
 };
 
 // update by Id
+
 export const updateTransaction = async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
 
     if (!id) {
-      return res.status(400).json({ msg: "transactionId is required" });
+      return res.status(400).json({
+        msg: "transactionId is required",
+      });
     }
 
     // 🔒 Protect system fields
     delete data._id;
     delete data.transactionId;
-    delete data.transactionType;
 
     // 🔥 Extract uploaded files
     const image = req.files?.image
@@ -122,63 +124,101 @@ export const updateTransaction = async (req, res) => {
       ? `uploads/${req.files.document[0].filename}`
       : undefined;
 
-    const updateFields = {
-      ...data,
-      ...(image && { image }),
-      ...(signature && { signature }),
-      ...(documentFile && { documents: documentFile }),
-    };
-       delete updateFields.fullname;
-
+    // 🔥 Get existing transactions BEFORE building update
     const transactions = await transactionSchema.find({
       transactionId: id,
     });
 
     if (!transactions.length) {
-      return res.status(404).json({ msg: "Transaction not found" });
+      return res.status(404).json({
+        msg: "Transaction not found",
+      });
     }
 
-    // ===============================
+    // =====================================================
     // 🔥 TRANSFER UPDATE
-    // ===============================
+    // =====================================================
+    //
+    // Keep your existing transfer behavior.
+    // The two records are identified by their CURRENT
+    // transactionType: credit and debit.
+    //
     if (transactions.length === 2) {
       const originalAmount = Number(data.amount || 0);
       const convertedAmount = Number(data.finalAmount || 0);
 
-     
+      // -----------------------------------------------
+      // CREDIT / RECEIVER
+      // -----------------------------------------------
+
+      const creditUpdateFields = {
+        ...data,
+
+        accountNo: data.to,
+        fullname: data.receiverFullname,
+
+        amount: convertedAmount,
+        finalAmount: convertedAmount,
+        currency: data.toCurrency,
+      };
+
+      delete creditUpdateFields._id;
+      delete creditUpdateFields.transactionId;
+      delete creditUpdateFields.transactionType;
+      delete creditUpdateFields.fullname;
+
+      if (image) creditUpdateFields.image = image;
+      if (signature) creditUpdateFields.signature = signature;
+      if (documentFile) {
+        creditUpdateFields.documents = documentFile;
+      }
+
       await transactionSchema.findOneAndUpdate(
         {
           transactionId: id,
           transactionType: "credit",
         },
         {
-          ...updateFields,
-
-          accountNo: data.to,
-          fullname: data.receiverFullname,
-
-          amount: convertedAmount,
-          finalAmount: convertedAmount,
-          currency: data.toCurrency,
+          $set: creditUpdateFields,
         },
       );
-     
+
+      // -----------------------------------------------
+      // DEBIT / SENDER
+      // -----------------------------------------------
+
+      const debitUpdateFields = {
+        ...data,
+
+        exchangeRate: data.exchangeRate,
+        accountNo: data.accountNo,
+        fullname: data.fullname,
+
+        to: data.to,
+
+        amount: originalAmount,
+        finalAmount: convertedAmount,
+        currency: data.fromCurrency,
+      };
+
+      delete debitUpdateFields._id;
+      delete debitUpdateFields.transactionId;
+      delete debitUpdateFields.transactionType;
+      delete debitUpdateFields.fullname;
+
+      if (image) debitUpdateFields.image = image;
+      if (signature) debitUpdateFields.signature = signature;
+      if (documentFile) {
+        debitUpdateFields.documents = documentFile;
+      }
+
       await transactionSchema.findOneAndUpdate(
         {
           transactionId: id,
           transactionType: "debit",
         },
         {
-          ...updateFields,
-          exchangeRate: data.exchangeRate,
-          accountNo: data.accountNo,
-          fullname: data.fullname,
-
-          to: data.to,
-
-          amount: originalAmount,
-          finalAmount: convertedAmount,
-          currency: data.fromCurrency,
+          $set: debitUpdateFields,
         },
       );
 
@@ -187,13 +227,37 @@ export const updateTransaction = async (req, res) => {
       });
     }
 
-    // ===============================
-    // 🔥 SINGLE UPDATE
-    // ===============================
-    const updated = await transactionSchema.findOneAndUpdate(
-      { transactionId: id },
-      { $set: updateFields },
-      { new: true },
+    // =====================================================
+    // 🔥 SINGLE TRANSACTION UPDATE
+    // =====================================================
+
+    const currentTransaction = transactions[0];
+
+    const updateFields = {
+      ...data,
+      ...(image && { image }),
+      ...(signature && { signature }),
+      ...(documentFile && {
+        documents: documentFile,
+      }),
+    };
+
+    // Protect system fields
+    delete updateFields._id;
+    delete updateFields.transactionId;
+
+    // fullname is still protected exactly as before
+    delete updateFields.fullname;
+      const updated = await transactionSchema.findOneAndUpdate(
+      {
+        transactionId: id,
+      },
+      {
+        $set: updateFields,
+      },
+      {
+        new: true,
+      },
     );
 
     return res.status(200).json({
@@ -202,6 +266,7 @@ export const updateTransaction = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+
     return res.status(500).json({
       msg: "Internal Server Error",
       error: err.message,

@@ -11,6 +11,12 @@ const registerSchema = new Schema(
     accountNo: {
       type: String,
       trim: true,
+      unique: true,
+    },
+    customerId: {
+      type: String,
+      trim: true,
+      index: true,
     },
 
     email: {
@@ -74,7 +80,7 @@ const registerSchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default model("User", registerSchema);
