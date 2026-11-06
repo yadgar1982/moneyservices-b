@@ -12,6 +12,7 @@ import "./Scheduler/backupScheduler.js";
 import registerRouter from "./routes/AdminRoutes/register.route.js";
 import transactionRouter from "./routes/UserRoutes/transaction.route.js";
 import comissionRouter from "./routes/UserRoutes/comission.route.js";
+import vaultRouter from "./routes/UserRoutes/vault.route.js";
 import loginRouter from "./routes/publicrouts/login.route.js";
 import brandingRouter from "./routes/AdminRoutes/branding.route.js";
 import currencyRouter from "./routes/AdminRoutes/currency.route.js";
@@ -59,6 +60,7 @@ app.use("/logoUpload", express.static(path.join(__dirname, "uploads/logoUpload")
 app.use("/api/user", registerRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/comission", comissionRouter);
+app.use("/api/vault", vaultRouter);
 app.use("/api/auth", loginRouter);
 app.use("/api/branding", brandingRouter);
 app.use("/api/currency", currencyRouter);

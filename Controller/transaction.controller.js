@@ -354,8 +354,7 @@ export const updateTransaction = async (req, res) => {
 
           amount: finalAmount,
           finalAmount: finalAmount,
-
-          currency: data.toCurrency,
+          currency: data.toCurrency || data.currency || "",
         };
 
         // Protect system fields

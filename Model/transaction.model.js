@@ -9,10 +9,11 @@ const transactionSchema = new mongoose.Schema(
     accountNo: { type: Number, required: true },
     currency: { type: String, required: true },
     amount: { type: Number, required: true },
-    finalAmount: { type: Number, required: true },
     exchangeRate: { type: Number,  },
     transactionId: { type: String, required: true },
     transactionNo: { type: String, required: true },
+    vaultAmount: { type: Number, required: true },
+    comission: { type: Number, default: 0 },
     transactionType: {
       type: String,
     },
