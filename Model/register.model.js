@@ -43,10 +43,10 @@ const registerSchema = new Schema(
       trim: true,
     },
 
-    address: {
-      type: String,
-      required: false,
-    },
+ address: {
+  type: String,
+  default: null,
+},
 
     branch: {
       type: String,
@@ -58,6 +58,12 @@ const registerSchema = new Schema(
       required: true,
       lowercase: true,
     },
+
+    reference: {
+  type: String,
+  trim: true,
+  lowercase: true,
+},
 
     profile: {
       type: String,

@@ -9,7 +9,8 @@ const vualtSchema = new mongoose.Schema(
     accountNo: { type: String, required: true },
     currency: { type: String, required: true },
     credit: { type: Number, required: true },
-    debit: { type: Number, required: true },
+    credit: { type: Number, required: true },
+    exchangeRate: { type: Number },
     transactionId: { type: String, required: true },
     transactionNo: { type: String},
     transactionType: {

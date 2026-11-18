@@ -79,57 +79,6 @@ export const getVaultByAcc = async (req, res) => {
   }
 };
 
-//Update
-// export const updateVault = async (req, res) => {
-//   try {
-
-//     const { id } = req.params;
-//     const { transactionId, ...data } = req.body;
-
-//     if (!id) {
-//       return res.status(400).json({ msg: "transactionId is required" });
-//     }
-
-//     if (!Object.keys(data).length) {
-//       return res.status(400).json({
-//         msg: "No data provided",
-//       });
-//     }
-
-//     const filter =
-//   ["debit", "credit"].includes(data.transactionType)
-//     ? {
-//         transactionId: id,
-//         transactionType: data.transactionType,
-//       }
-//     : { transactionId: id };
-
-// const updated = await vault.findOneAndUpdate(
-//   filter,
-//   { $set: data },
-//   { new: true },
-// );
-//     if (!updated) {
-//       return res.status(404).json({
-//         msg: "Vault not found",
-//       });
-//     }
-
-//     return res.status(200).json({
-//       msg: "Vault updated successfully",
-//       data: updated,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json({
-//       msg: "Internal Server Error",
-//       error: err.message,
-//     });
-//   }
-// };
-
-
-
 export const updateVault = async (req, res) => {
   try {
     const { id } = req.params;

@@ -41,3 +41,6 @@ uploads/transactions/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+uploads/userUpload/
+
