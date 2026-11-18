@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "6a41ea7bcccf1728592b72c0",
+    "branch": "Kabul",
+    "branchCode": "1001",
+    "createdAt": "2026-06-29T03:46:03.048Z",
+    "updatedAt": "2026-06-29T03:46:03.048Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a41ea81cccf1728592b72c4",
+    "branch": "Mazar",
+    "branchCode": "1002",
+    "createdAt": "2026-06-29T03:46:09.089Z",
+    "updatedAt": "2026-06-29T03:46:09.089Z",
+    "__v": 0
+  }
+]

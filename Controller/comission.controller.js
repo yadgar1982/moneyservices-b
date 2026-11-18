@@ -1,21 +1,76 @@
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+
 import comissionSchema from "../Model/comission.model.js";
 
 // Create comission
+// export const createComission = async (req, res) => {
+//   try {
+//     const { _id, ...data } = req.body;
+//     const comission = await comissionSchema.create(data);
+
+//     return res.status(201).json({
+//       msg: "data registered successfully",
+//       data: comission,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ msg: err.message });
+//   }
+// };
+
+
 export const createComission = async (req, res) => {
   try {
-    const { _id, ...data } = req.body;
-    const comission = await comissionSchema.create(data);
+    const { _id, transactionId, ...data } = req.body;
 
-    return res.status(201).json({
-      msg: "data registered successfully",
-      data: comission,
+    // Generate and claim the next ID using Commission records.
+    // Retry if another request claims the same ID simultaneously.
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const lastCommission = await comissionSchema
+        .findOne({
+          transactionId: { $regex: /^TRX-\d{8}$/ },
+        })
+        .sort({ transactionId: -1 })
+        .select("transactionId")
+        .lean();
+
+      const lastNumber = lastCommission
+        ? Number(lastCommission.transactionId.replace("TRX-", ""))
+        : 0;
+
+      const nextTransactionId = `TRX-${String(
+        lastNumber + 1,
+      ).padStart(8, "0")}`;
+
+      try {
+        const comission = await comissionSchema.create({
+          ...data,
+          transactionId: nextTransactionId,
+        });
+
+        return res.status(201).json({
+          msg: "Commission registered successfully",
+          transactionId: nextTransactionId,
+          data: comission,
+        });
+      } catch (err) {
+        // Another request may have claimed this ID.
+        if (err.code === 11000 && attempt < 9) {
+          continue;
+        }
+
+        throw err;
+      }
+    }
+
+    return res.status(409).json({
+      msg: "Could not generate a unique Transaction ID. Please try again.",
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: err.message });
+    console.error("CREATE COMMISSION ERROR:", err);
+
+    return res.status(500).json({
+      msg: err.message || "Failed to create Commission",
+    });
   }
 };
 

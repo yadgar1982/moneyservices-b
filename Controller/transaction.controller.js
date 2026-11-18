@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import transactionSchema from "../Model/transaction.model.js";
 
+import commissionSchema from "../Model/comission.model.js"
 // Create Transaction
 export const create = async (req, res) => {
   try {
@@ -93,186 +94,6 @@ export const getTransactionByAccountNo = async (req, res) => {
       .json({ msg: "Internal server error", error: err.message });
   }
 };
-
-// update by Id
-
-// export const updateTransaction = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const data = req.body;
-
-//     if (!id) {
-//       return res.status(400).json({
-//         msg: "transactionId is required",
-//       });
-//     }
-
-//     // 🔒 Protect system fields
-//     delete data._id;
-//     delete data.transactionId;
-
-//     // 🔥 Extract uploaded files
-//     const image = req.files?.image
-//       ? `uploads/${req.files.image[0].filename}`
-//       : undefined;
-
-//     const signature = req.files?.signature
-//       ? `uploads/${req.files.signature[0].filename}`
-//       : undefined;
-
-//     const documentFile = req.files?.document
-//       ? `uploads/${req.files.document[0].filename}`
-//       : undefined;
-
-//     // 🔥 Get existing transactions BEFORE building update
-//     const transactions = await transactionSchema.find({
-//       transactionId: id,
-//     });
-
-//     if (!transactions.length) {
-//       return res.status(404).json({
-//         msg: "Transaction not found",
-//       });
-//     }
-
-//     // =====================================================
-//     // 🔥 TRANSFER UPDATE
-//     // =====================================================
-//     //
-//     // Keep your existing transfer behavior.
-//     // The two records are identified by their CURRENT
-//     // transactionType: credit and debit.
-//     //
-//     if (transactions.length === 2) {
-//       const originalAmount = Number(data.amount || 0);
-//       const convertedAmount = Number(data.finalAmount || 0);
-
-//       // -----------------------------------------------
-//       // CREDIT / RECEIVER
-//       // -----------------------------------------------
-
-//       const creditUpdateFields = {
-//         ...data,
-
-//         accountNo: data.to,
-//         fullname: data.receiverFullname,
-
-//         amount: convertedAmount,
-//         finalAmount: convertedAmount,
-//         currency: data.toCurrency,
-//       };
-
-//       delete creditUpdateFields._id;
-//       delete creditUpdateFields.transactionId;
-//       delete creditUpdateFields.transactionType;
-//       delete creditUpdateFields.fullname;
-
-//       if (image) creditUpdateFields.image = image;
-//       if (signature) creditUpdateFields.signature = signature;
-//       if (documentFile) {
-//         creditUpdateFields.documents = documentFile;
-//       }
-
-//       await transactionSchema.findOneAndUpdate(
-//         {
-//           transactionId: id,
-//           transactionType: "credit",
-//         },
-//         {
-//           $set: creditUpdateFields,
-//         },
-//       );
-
-//       // -----------------------------------------------
-//       // DEBIT / SENDER
-//       // -----------------------------------------------
-
-//       const debitUpdateFields = {
-//         ...data,
-
-//         exchangeRate: data.exchangeRate,
-//         accountNo: data.accountNo,
-//         fullname: data.fullname,
-
-//         to: data.to,
-
-//         amount: originalAmount,
-//         finalAmount: convertedAmount,
-//         currency: data.fromCurrency,
-//       };
-
-//       delete debitUpdateFields._id;
-//       delete debitUpdateFields.transactionId;
-//       delete debitUpdateFields.transactionType;
-//       delete debitUpdateFields.fullname;
-
-//       if (image) debitUpdateFields.image = image;
-//       if (signature) debitUpdateFields.signature = signature;
-//       if (documentFile) {
-//         debitUpdateFields.documents = documentFile;
-//       }
-
-//       await transactionSchema.findOneAndUpdate(
-//         {
-//           transactionId: id,
-//           transactionType: "debit",
-//         },
-//         {
-//           $set: debitUpdateFields,
-//         },
-//       );
-
-//       return res.status(200).json({
-//         msg: "Transfer updated correctly",
-//       });
-//     }
-
-//     // =====================================================
-//     // 🔥 SINGLE TRANSACTION UPDATE
-//     // =====================================================
-
-//     const currentTransaction = transactions[0];
-
-//     const updateFields = {
-//       ...data,
-//       ...(image && { image }),
-//       ...(signature && { signature }),
-//       ...(documentFile && {
-//         documents: documentFile,
-//       }),
-//     };
-
-//     // Protect system fields
-//     delete updateFields._id;
-//     delete updateFields.transactionId;
-
-//     // fullname is still protected exactly as before
-//     delete updateFields.fullname;
-//       const updated = await transactionSchema.findOneAndUpdate(
-//       {
-//         transactionId: id,
-//       },
-//       {
-//         $set: updateFields,
-//       },
-//       {
-//         new: true,
-//       },
-//     );
-
-//     return res.status(200).json({
-//       msg: "Transaction updated successfully",
-//       data: updated,
-//     });
-//   } catch (err) {
-//     console.error(err);
-
-//     return res.status(500).json({
-//       msg: "Internal Server Error",
-//       error: err.message,
-//     });
-//   }
-// };
 
 
 export const updateTransaction = async (req, res) => {
@@ -645,33 +466,40 @@ export const deleteTransactionByAccountNo = async (req, res) => {
 
 
 
-// Generate Trnsaction Id
 
-export const getNextTransactionId=async(req,res)=>{
-  try{
-    // Find the latest transaction
-    const lastTransactgion = await transactionSchema.findOne()
-    .sort({transactionId:-1});
-    let nextNumber=1;
-    // If a transaction exists, get its number
-    if(lastTransactgion && lastTransactgion.transactionId){
-      nextNumber=
-      parseInt(
-        lastTransactgion.transactionId.replace("TRX-", ""),10 ) +1;}
+// export const getNextTransactionId = async (req, res) => {
+//   try {
+//     // Find the highest Transaction ID already saved in Commission
+//     const lastCommission = await commissionSchema
+//       .findOne({
+//         transactionId: { $exists: true, $ne: "" },
+//       })
+//       .sort({ transactionId: -1 });
 
+//     const lastTransactionId =
+//       lastCommission?.transactionId || "TRX-00000000";
 
-    // Create the Next Id
-    const transactionId = `TRX-${String(nextNumber).padStart(8, "0")}`;
+//     const lastNumber = Number(
+//       lastTransactionId.replace("TRX-", "")
+//     );
 
-    return res.status(200).json({
-      transactionId,
-    });
-      
-    }catch(error){
-      console.error(error);
-      return res.status(500).json({
-        message:"Failed to generate Transaction Id"
-      })
-  }
+//     if (!Number.isFinite(lastNumber)) {
+//       throw new Error("Invalid last Transaction ID");
+//     }
 
-}
+//     const nextTransactionId = `TRX-${String(
+//       lastNumber + 1
+//     ).padStart(8, "0")}`;
+
+//     return res.status(200).json({
+//       transactionId: nextTransactionId,
+//     });
+
+//   } catch (error) {
+//     console.error("NEXT TRANSACTION ID ERROR:", error);
+
+//     return res.status(500).json({
+//       message: "Failed to generate Transaction Id",
+//     });
+//   }
+// };

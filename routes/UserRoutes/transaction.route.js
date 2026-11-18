@@ -9,14 +9,14 @@ import {
   getTransactionById,
   deleteTransaction,
   updateTransactionByAccountNo, 
-  getNextTransactionId,
   updateTransactionPass,
+
  
 } from "../../Controller/transaction.controller.js";
 
 
 // generation trId route
-transactionRouter.get("/next-id", getNextTransactionId);
+// transactionRouter.get("/next-id", getNextTransactionId);
 
 
 // Create a transaction
@@ -59,5 +59,6 @@ transactionRouter.put('/updatebyaccountno/:accountNo', updateTransactionByAccoun
 transactionRouter.get('/getbyaccountno/:accountNo', getTransactionByAccountNo);
 // updated ispass
 transactionRouter.put("/updatemany/:id", updateTransactionPass);
+
 
 export default transactionRouter;

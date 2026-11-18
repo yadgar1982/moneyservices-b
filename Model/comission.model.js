@@ -10,7 +10,7 @@ const comissionSchema = new mongoose.Schema(
     currency: { type: String, required: true },
     credit: { type: Number, required: true },
     debit: { type: Number, required: true },
-    transactionId: { type: String, required: true },
+   transactionId: {type: String, required: true, unique: true, trim: true},
     transactionNo: { type: String},
     transactionType: {
       type: String,
