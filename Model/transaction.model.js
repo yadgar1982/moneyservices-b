@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const transactionSchema = new mongoose.Schema(
+ 
   {
     fullname: { type: String },
     toFullname: { type: String },
@@ -34,6 +35,16 @@ const transactionSchema = new mongoose.Schema(
   },
 
   { timestamps: true },
+);
+ transactionSchema.index(
+  {
+    transactionId: 1,
+    transactionType: 1,
+    transaction: 1,
+  },
+  {
+    unique: true,
+  },
 );
 
 export default mongoose.model("Transaction", transactionSchema);
