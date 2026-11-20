@@ -4,39 +4,87 @@ import fs from "fs/promises";
 import path from "path";
 
 
-// create user
+// Create User
+
+
 export const createUser = async (req, res) => {
   try {
     const data = req.body;
-    const isUser = await userSchema.findOne({ email: data.email });
-    if (isUser) {
-      return res.status(400).json({ msg: "User already exist" });
+
+    const email = String(data.email || "").trim().toLowerCase();
+    const accountNo = String(data.accountNo || "").trim();
+
+    // Check duplicate email
+    const existingEmail = await userSchema.findOne({ email });
+
+    if (existingEmail) {
+      return res.status(409).json({
+        msg: "Email already exists",
+      });
     }
-  
 
-    const profile = req.file ? `/userProfile/${req.file.filename}` : null;
-    console.log("profile image", profile);
-   
-    // hash password
-  const defaultPassword = "123456";
+    // Check duplicate account number for customers
+    if (data.role === "customer") {
+      if (!accountNo) {
+        return res.status(400).json({
+          msg: "Account number is required",
+        });
+      }
 
+      const existingAccount = await userSchema.findOne({
+        accountNo,
+        role: "customer",
+      });
+
+      if (existingAccount) {
+        return res.status(409).json({
+          msg: "Account number already exists",
+        });
+      }
+    }
+
+    const profile = req.file
+      ? `/userProfile/${req.file.filename}`
+      : null;
+
+    const defaultPassword = "123456";
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
-    const user = await new userSchema({
-      ...data, // allowed fields only
+    const user = await userSchema.create({
+      ...data,
+      email,
+      accountNo,
       password: hashedPassword,
       profile,
-    }).save();
-    res.status(200).json({
+    });
+
+    return res.status(201).json({
       msg: "User created successfully",
       user,
     });
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
-    console.log("err", err);
+    // Handle MongoDB duplicate-key errors
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0];
+
+      return res.status(409).json({
+        msg:
+          field === "accountNo"
+            ? "Account number already exists"
+            : "Email already exists",
+      });
+    }
+
+    console.error("CREATE USER ERROR:", err);
+
+    return res.status(500).json({
+      msg: err.message,
+    });
   }
 };
+
 
 //get all users
 
