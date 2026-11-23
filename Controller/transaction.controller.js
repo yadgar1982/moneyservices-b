@@ -2,8 +2,76 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import transactionSchema from "../Model/transaction.model.js";
+import transactionCounterSchema from "../Model/transactionCounter.model.js";
 
-import commissionSchema from "../Model/comission.model.js"
+
+
+export const generateTransactionId = async (req, res) => {
+  try {
+    const { fullname } = req.body;
+
+    if (!fullname || !fullname.trim()) {
+      return res.status(400).json({
+        msg: "User name is required",
+      });
+    }
+
+    const prefix = fullname
+      .replace(/[^a-zA-Z]/g, "")
+      .substring(0, 3)
+      .toUpperCase();
+
+    if (prefix.length !== 3) {
+      return res.status(400).json({
+        msg: "User name must contain at least three letters",
+      });
+    }
+
+    let counter;
+
+    try {
+      counter = await transactionCounterSchema.findOneAndUpdate(
+        { _id: prefix },
+        { $inc: { sequence: 1 } },
+        {
+          new: true,
+          upsert: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+    } catch (error) {
+      // Another request may have created this prefix first.
+      if (error.code !== 11000) throw error;
+
+      counter = await transactionCounterSchema.findOneAndUpdate(
+        { _id: prefix },
+        { $inc: { sequence: 1 } },
+        { new: true }
+      );
+    }
+
+    if (!counter || counter.sequence > 99999999) {
+      return res.status(409).json({
+        msg: `The ${prefix} transaction ID limit has been reached`,
+      });
+    }
+
+    const transactionId = `${prefix}-${String(
+      counter.sequence
+    ).padStart(8, "0")}`;
+
+    return res.status(200).json({
+      transactionId,
+    });
+  } catch (error) {
+    console.error("GENERATE TRANSACTION ID ERROR:", error);
+
+    return res.status(500).json({
+      msg: error.message || "Failed to generate transaction ID",
+    });
+  }
+};
+
 // Create Transaction
 export const create = async (req, res) => {
   try {

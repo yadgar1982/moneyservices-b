@@ -3,51 +3,79 @@ import comissionSchema from "../Model/comission.model.js";
 
 
 // create
+// export const createComission = async (req, res) => {
+//   try {
+//     const { _id, transactionId, ...data } = req.body;
+
+//     for (let attempt = 0; attempt < 20; attempt++) {
+//       const lastCommission = await comissionSchema
+//         .findOne({
+//           transactionId: { $regex: /^TRX-\d{8}$/ },
+//         })
+//         .sort({ transactionId: -1 })
+//         .select("transactionId")
+//         .lean();
+
+//       const lastNumber = lastCommission
+//         ? Number(lastCommission.transactionId.replace("TRX-", ""))
+//         : 0;
+
+//       const nextTransactionId = `TRX-${String(
+//         lastNumber + 1,
+//       ).padStart(8, "0")}`;
+
+//       try {
+//         const commission = await comissionSchema.create({
+//           ...data,
+//           transactionId: nextTransactionId,
+//         });
+
+//         return res.status(201).json({
+//           msg: "Commission registered successfully",
+//           transactionId: nextTransactionId,
+//           data: commission,
+//         });
+//       } catch (err) {
+//         if (err.code === 11000 && attempt < 19) {
+//           // Another request claimed this ID.
+//           // Retry and calculate the next available ID.
+//           continue;
+//         }
+
+//         throw err;
+//       }
+//     }
+
+//     return res.status(409).json({
+//       msg: "Unable to generate a unique Transaction ID. Please try again.",
+//     });
+//   } catch (err) {
+//     console.error("CREATE COMMISSION ERROR:", err);
+
+//     return res.status(500).json({
+//       msg: err.message || "Failed to create Commission",
+//     });
+//   }
+// };
+
+
+// Create Commission
 export const createComission = async (req, res) => {
   try {
-    const { _id, transactionId, ...data } = req.body;
+    const { _id, ...data } = req.body;
 
-    for (let attempt = 0; attempt < 20; attempt++) {
-      const lastCommission = await comissionSchema
-        .findOne({
-          transactionId: { $regex: /^TRX-\d{8}$/ },
-        })
-        .sort({ transactionId: -1 })
-        .select("transactionId")
-        .lean();
-
-      const lastNumber = lastCommission
-        ? Number(lastCommission.transactionId.replace("TRX-", ""))
-        : 0;
-
-      const nextTransactionId = `TRX-${String(
-        lastNumber + 1,
-      ).padStart(8, "0")}`;
-
-      try {
-        const commission = await comissionSchema.create({
-          ...data,
-          transactionId: nextTransactionId,
-        });
-
-        return res.status(201).json({
-          msg: "Commission registered successfully",
-          transactionId: nextTransactionId,
-          data: commission,
-        });
-      } catch (err) {
-        if (err.code === 11000 && attempt < 19) {
-          // Another request claimed this ID.
-          // Retry and calculate the next available ID.
-          continue;
-        }
-
-        throw err;
-      }
+    if (!data.transactionId) {
+      return res.status(400).json({
+        msg: "Transaction ID is required",
+      });
     }
 
-    return res.status(409).json({
-      msg: "Unable to generate a unique Transaction ID. Please try again.",
+    const commission = await comissionSchema.create(data);
+
+    return res.status(201).json({
+      msg: "Commission registered successfully",
+      transactionId: commission.transactionId,
+      data: commission,
     });
   } catch (err) {
     console.error("CREATE COMMISSION ERROR:", err);
@@ -57,6 +85,7 @@ export const createComission = async (req, res) => {
     });
   }
 };
+
 export const getAllComissions = async (req, res) => {
   try {
     const comissions = await comissionSchema.find().sort({ transactionId: -1 });

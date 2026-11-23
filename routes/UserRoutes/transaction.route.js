@@ -3,6 +3,7 @@ const transactionRouter = express.Router();
 import { upload } from "../../Middleware/uploadMiddleware.js";
 import {
   create,
+  generateTransactionId,
   getAllTransactions,
   updateTransaction,
   getTransactionByAccountNo,
@@ -16,8 +17,8 @@ import {
 
 
 // generation trId route
-// transactionRouter.get("/next-id", getNextTransactionId);
 
+transactionRouter.post("/generate-id", generateTransactionId);
 
 // Create a transaction
 transactionRouter.post(

@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 
 export const verifyToken = (req, res, next) => {
   try {
-    console.log("Cookies:", req.cookies);
 
     const token = req.cookies.authToken;
     console.log("Token:", token);
@@ -14,11 +13,8 @@ export const verifyToken = (req, res, next) => {
       });
     }
 
-    console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    console.log("Decoded User:", decoded);
 
     req.user = decoded;
     next();
