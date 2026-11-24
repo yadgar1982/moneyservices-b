@@ -7,6 +7,75 @@ import { sendEmail } from "../config/nodmailer.js";
 import Register from "../Model/register.model.js"
 
 // Login
+// export const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password) {
+//       return res.status(400).json({
+//         msg: "Email and Password are required",
+//       });
+//     }
+
+//     const normalizedEmail = email.trim().toLowerCase();
+
+// const user = await userSchema.findOne({
+//   email: normalizedEmail,
+// });
+
+//     if (!user) {
+//       return res.status(401).json({
+//         msg: "Invalid Credentials",
+//       });
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+
+//     if (!isMatch) {
+//       return res.status(401).json({
+//         msg: "Invalid Credentials",
+//       });
+//     }
+
+//     const payload = {
+//       email: user.email,
+//       role: user.role,
+//       id: user._id,
+//     };
+
+//     const token = jwt.sign(payload, process.env.JWT_SECRET, {
+//       expiresIn: "4h",
+//     });
+
+//    res.cookie("authToken", token, {
+//         httpOnly: true,
+//         secure: true,
+//         sameSite: "none",
+//         maxAge: 4 * 60 * 60 * 1000,
+//         path: "/",
+//       });
+
+//     const safeUser = await userSchema
+//       .findById(user._id)
+//       .select("-password");
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Login successful",
+//       user: safeUser,
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+
+//     return res.status(500).json({
+//       message: "Server error",
+//       error: err.message,
+//     });
+//   }
+// };
+
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -17,15 +86,34 @@ export const login = async (req, res) => {
       });
     }
 
-    const user = await userSchema.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await userSchema.findOne({
+      email: normalizedEmail,
+    });
+
+    console.log("========== LOGIN DEBUG ==========");
+    console.log("Email received:", normalizedEmail);
+    console.log("User found:", !!user);
 
     if (!user) {
+      console.log("RESULT: USER NOT FOUND");
       return res.status(401).json({
         msg: "Invalid Credentials",
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("User fullname:", user.fullname);
+    console.log("User role:", user.role);
+    console.log("Password hash exists:", !!user.password);
+
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    console.log("Password matched:", isMatch);
+    console.log("=================================");
 
     if (!isMatch) {
       return res.status(401).json({
@@ -43,13 +131,13 @@ export const login = async (req, res) => {
       expiresIn: "4h",
     });
 
-   res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 4 * 60 * 60 * 1000,
-        path: "/",
-      });
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 4 * 60 * 60 * 1000,
+      path: "/",
+    });
 
     const safeUser = await userSchema
       .findById(user._id)
@@ -62,15 +150,13 @@ export const login = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("LOGIN ERROR:", err);
 
     return res.status(500).json({
       message: "Server error",
-      error: err.message,
     });
   }
 };
-
 // Session
 export const session = async (req, res) => {
   try {

@@ -3,15 +3,15 @@ import userSchema from "../../Model/register.model.js";
 import fs from "fs/promises";
 import path from "path";
 
-
 // Create User
-
 
 export const createUser = async (req, res) => {
   try {
     const data = req.body;
 
-    const email = String(data.email || "").trim().toLowerCase();
+    const email = String(data.email || "")
+      .trim()
+      .toLowerCase();
     const accountNo = String(data.accountNo || "").trim();
 
     // Check duplicate email
@@ -43,13 +43,30 @@ export const createUser = async (req, res) => {
       }
     }
 
-    const profile = req.file
-      ? `/userProfile/${req.file.filename}`
-      : null;
+    const profile = req.file ? `/userProfile/${req.file.filename}` : null;
+    
+    // hash password
+  
+    let passwordToHash;
 
-    const defaultPassword = "123456";
+    if (data.role === "customer") {
+      passwordToHash = `${String(data.fullname).trim()}@123456`;
+    } else if (data.role === "user" || data.role === "admin") {
+      if (!data.password || !String(data.password).trim()) {
+        return res.status(400).json({
+          msg: "Password is required for user and admin accounts",
+        });
+      }
+
+      passwordToHash = data.password;
+    } else {
+      return res.status(400).json({
+        msg: "Invalid user role",
+      });
+    }
+
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(defaultPassword, salt);
+    const hashedPassword = await bcrypt.hash(passwordToHash, salt);
 
     const user = await userSchema.create({
       ...data,
@@ -63,7 +80,6 @@ export const createUser = async (req, res) => {
       msg: "User created successfully",
       user,
     });
-
   } catch (err) {
     // Handle MongoDB duplicate-key errors
     if (err.code === 11000) {
@@ -84,7 +100,6 @@ export const createUser = async (req, res) => {
     });
   }
 };
-
 
 //get all users
 
@@ -136,7 +151,7 @@ export const updateUser = async (req, res) => {
         const oldPath = path.join(
           process.cwd(),
           "uploads/userUpload",
-          path.basename(existingUser.profile)
+          path.basename(existingUser.profile),
         );
 
         await fs.unlink(oldPath).catch(() => {
@@ -155,7 +170,6 @@ export const updateUser = async (req, res) => {
       msg: "User updated successfully",
       data: user,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Failed to update user", err });
@@ -198,38 +212,34 @@ export const updateByEmial = async (req, res) => {
 
 // delete user
 
-
-export const deleteUser=async(req,res)=>{
-  try{
-    const {id}=req.params;
-    const user= await userSchema.findById(id);
-    if(!user){
-      return res.status(404).json({msg:"User not found"});
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userSchema.findById(id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
     }
 
-    if (user.profile){
-      const filePath=path.join(
+    if (user.profile) {
+      const filePath = path.join(
         process.cwd(),
         "uploads/userUpload",
-        path.basename(user.profile)
+        path.basename(user.profile),
       );
-      try{
+      try {
         await fs.unlink(filePath);
-      }catch(err){
-        console.log("Image not found or already deleted")
+      } catch (err) {
+        console.log("Image not found or already deleted");
       }
     }
 
     await userSchema.findByIdAndDelete(id);
-    return res.status(200).json({msg:"User deleted successfully"})
-
-  }catch(err){
-    console.error(err)
-    res.status(500).json({msg:"Failed to delet user"})
-
+    return res.status(200).json({ msg: "User deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Failed to delet user" });
   }
-
-}
+};
 // delete user by email
 export const deleteUserByEmail = async (req, res) => {
   try {
